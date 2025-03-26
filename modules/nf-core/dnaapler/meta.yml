@@ -1,0 +1,41 @@
+name: dnaapler
+description: Reorients assembled microbial sequences
+keywords:
+  - quast
+  - assembly
+  - quality
+  - contig
+  - scaffold
+tools:
+  - quast:
+      description: |
+        dnaapler reorients assembled microbial sequences
+      homepage: hhttps://github.com/gbouras13/dnaapler
+      doi: 10.21105/joss.05968
+      licence: ["MIT"]
+input:
+  - assembly:
+      type: file
+      description: |
+        Fasta file containing the assembly of interest
+output:
+  - dnaapler:
+      type: directory
+      description: Directory containing complete dnaapler report
+      pattern: "{prefix}/"
+  - report:
+      type: file
+      description: tab-separated version of the summary
+      pattern: "${prefix}.tsv"
+  - assembly:
+      type: file
+      description: Reoriented genome
+      pattern: "${prefix}.fasta"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@gbouras13"
+maintainers:
+  - "@gbouras13"
