@@ -30,6 +30,7 @@ include { MINIMAP2_ALIGN as MINIMAP2_POLISH     } from '../modules/nf-core/minim
 include { MINIASM                               } from '../modules/nf-core/miniasm'
 include { DRAGONFLYE                            } from '../modules/nf-core/dragonflye'
 include { RACON                                 } from '../modules/nf-core/racon'
+include { DNAAPLER                              } from '../modules/nf-core/dnaapler'
 include { SAMTOOLS_SORT                         } from '../modules/nf-core/samtools/sort'
 include { SAMTOOLS_INDEX                        } from '../modules/nf-core/samtools/index'
 include { KRAKEN2_KRAKEN2 as KRAKEN2            } from '../modules/nf-core/kraken2/kraken2'
@@ -461,6 +462,23 @@ workflow BACASS {
             skip: true
         }
         .set{ ch_assembly_for_gunzip }
+
+    //
+    // MODULE: DNAAPLER, genome reorientation
+    //
+    ch_dnaapler_txt_multiqc = Channel.empty()
+    if ( params.assembly_type == 'short' ) {
+        // Uncompress assembly for annotation if necessary
+        GUNZIP ( ch_assembly_for_gunzip.gzip )
+        ch_to_dnaapler    = ch_assembly_for_gunzip.skip.mix( GUNZIP.out.gunzip )
+        ch_versions     = ch_versions.mix( GUNZIP.out.versions )
+
+        DNAAPLER (
+            ch_to_dnaapler.filter{ meta, fasta -> !fasta.isEmpty() }
+        )
+        ch_dnaapler_txt_multiqc   = DNAAPLER.out.reoriented.map{ meta, dnaapler_assembly -> [ dnaapler_assembly ]}
+        ch_versions             = ch_versions.mix(DNAAPLER.out.versions)
+    }
 
     //
     // MODULE: PROKKA, gene annotation
